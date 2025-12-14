@@ -3,8 +3,10 @@
 import dbConnect from '@/lib/db';
 import Program, { IProgram } from '@/models/Program';
 import { revalidatePath } from 'next/cache';
+import { simulateLatency } from '@/lib/utils';
 
 export async function createProgram(data: Partial<IProgram>) {
+  await simulateLatency();
   await dbConnect();
   try {
     await Program.create(data);
@@ -17,6 +19,7 @@ export async function createProgram(data: Partial<IProgram>) {
 }
 
 export async function getPrograms(query?: string, level?: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const filter: any = {};
@@ -36,6 +39,7 @@ export async function getPrograms(query?: string, level?: string) {
 }
 
 export async function getCoachPrograms(coachId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const programs = await Program.find({ coachId }).lean();
@@ -47,6 +51,7 @@ export async function getCoachPrograms(coachId: string) {
 }
 
 export async function deleteProgram(programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     await Program.findByIdAndDelete(programId);
@@ -59,6 +64,7 @@ export async function deleteProgram(programId: string) {
 }
 
 export async function getProgramById(programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const program = await Program.findById(programId).populate('coachId', 'name image').lean();
@@ -70,6 +76,7 @@ export async function getProgramById(programId: string) {
 }
 
 export async function updateProgram(programId: string, data: Partial<IProgram>) {
+  await simulateLatency();
   await dbConnect();
   try {
     await Program.findByIdAndUpdate(programId, data);
@@ -83,6 +90,7 @@ export async function updateProgram(programId: string, data: Partial<IProgram>) 
 }
 
 export async function getAllPrograms() {
+  await simulateLatency();
   await dbConnect();
   try {
     const programs = await Program.find().populate('coachId', 'name').lean();
@@ -94,6 +102,7 @@ export async function getAllPrograms() {
 }
 
 export async function getTopPrograms(limit: number = 5) {
+  await simulateLatency();
   await dbConnect();
   try {
     const programs = await Program.find()
@@ -115,6 +124,7 @@ export async function searchPrograms(filters: {
   tags?: string[];
   sortBy?: string;
 }) {
+  await simulateLatency();
   await dbConnect();
   try {
     const { query, level, minRating, tags, sortBy } = filters;
@@ -167,6 +177,7 @@ export async function searchPrograms(filters: {
 }
 
 export async function rateProgram(programId: string, userId: string, rating: number, review?: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const ProgramRating = (await import('@/models/ProgramRating')).default;
@@ -194,6 +205,7 @@ export async function rateProgram(programId: string, userId: string, rating: num
 }
 
 export async function getProgramRatings(programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const ProgramRating = (await import('@/models/ProgramRating')).default;
@@ -209,6 +221,7 @@ export async function getProgramRatings(programId: string) {
 }
 
 export async function getProgramAnalytics(programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const Enrollment = (await import('@/models/Enrollment')).default;

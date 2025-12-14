@@ -5,8 +5,10 @@ import User from '@/models/User';
 import Program from '@/models/Program';
 import Enrollment from '@/models/Enrollment';
 import ProgramRating from '@/models/ProgramRating';
+import { simulateLatency } from '@/lib/utils';
 
 export async function getAdminAnalytics() {
+    await simulateLatency();
     try {
         await dbConnect();
 
@@ -106,6 +108,7 @@ export async function getAdminAnalytics() {
 }
 
 export async function getCoachAnalytics(coachId: string) {
+    await simulateLatency();
     try {
         await dbConnect();
 
@@ -170,6 +173,7 @@ export async function getCoachAnalytics(coachId: string) {
 }
 
 export async function getClientAnalytics(clientId: string) {
+    await simulateLatency();
     try {
         await dbConnect();
 

@@ -3,7 +3,6 @@ import { auth, signOut } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Dumbbell } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
-import { ThemeToggle } from './theme-toggle';
 
 export default async function Navbar() {
   const session = await auth();
@@ -18,7 +17,6 @@ export default async function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <ThemeToggle />
           {user ? (
             <>
               <Button asChild variant="ghost">

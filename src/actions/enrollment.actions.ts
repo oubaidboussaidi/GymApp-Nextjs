@@ -3,8 +3,10 @@
 import dbConnect from '@/lib/db';
 import Enrollment from '@/models/Enrollment';
 import { revalidatePath } from 'next/cache';
+import { simulateLatency } from '@/lib/utils';
 
 export async function enrollUser(studentId: string, programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const existing = await Enrollment.findOne({ studentId, programId });
@@ -29,6 +31,7 @@ export async function enrollUser(studentId: string, programId: string) {
 }
 
 export async function getStudentEnrollments(studentId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const enrollments = await Enrollment.find({ studentId })
@@ -45,6 +48,7 @@ export async function getStudentEnrollments(studentId: string) {
 }
 
 export async function getProgramStudents(programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const enrollments = await Enrollment.find({ programId })
@@ -58,6 +62,7 @@ export async function getProgramStudents(programId: string) {
 }
 
 export async function kickStudent(enrollmentId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     await Enrollment.findByIdAndDelete(enrollmentId);
@@ -70,6 +75,7 @@ export async function kickStudent(enrollmentId: string) {
 }
 
 export async function updateProgress(enrollmentId: string, progress: number, completedExercises?: string[]) {
+  await simulateLatency();
   await dbConnect();
   try {
     const updateData: any = {
@@ -95,6 +101,7 @@ export async function updateProgress(enrollmentId: string, progress: number, com
 }
 
 export async function getCoachStudents(coachId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const Program = (await import('@/models/Program')).default;
@@ -116,6 +123,7 @@ export async function getCoachStudents(coachId: string) {
 }
 
 export async function getStudentProgress(studentId: string, programId?: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const filter: any = { studentId };
@@ -136,6 +144,7 @@ export async function getStudentProgress(studentId: string, programId?: string) 
 }
 
 export async function markProgramComplete(enrollmentId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     await Enrollment.findByIdAndUpdate(enrollmentId, {
@@ -153,6 +162,7 @@ export async function markProgramComplete(enrollmentId: string) {
 }
 
 export async function incrementProgramEnrollment(programId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const Program = (await import('@/models/Program')).default;

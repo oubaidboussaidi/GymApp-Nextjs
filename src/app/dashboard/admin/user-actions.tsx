@@ -21,12 +21,26 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function UserActions({ user }: { user: any }) {
     const [openEdit, setOpenEdit] = useState(false);
+    const queryClient = useQueryClient();
+
+    const invalidateUserQueries = () => {
+        queryClient.invalidateQueries({ queryKey: ['all-users'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-analytics'] });
+    };
 
     const handleDelete = async () => {
-        await deleteUser(user._id);
+        const result = await deleteUser(user._id);
+        if (result.success) {
+            toast.success('User deleted successfully');
+            invalidateUserQueries();
+        } else {
+            toast.error(result.error || 'Failed to delete user');
+        }
     };
 
     const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,12 +49,24 @@ export default function UserActions({ user }: { user: any }) {
         const name = formData.get('name') as string;
         const role = formData.get('role') as 'admin' | 'coach' | 'client';
 
-        await updateUser(user._id, { name, role });
-        setOpenEdit(false);
+        const result = await updateUser(user._id, { name, role });
+        if (result.success) {
+            toast.success('User updated successfully');
+            setOpenEdit(false);
+            invalidateUserQueries();
+        } else {
+            toast.error(result.error || 'Failed to update user');
+        }
     };
 
     const handleToggleStatus = async () => {
-        await toggleUserStatus(user._id);
+        const result = await toggleUserStatus(user._id);
+        if (result.success) {
+            toast.success(`User ${user.isActive ? 'deactivated' : 'activated'} successfully`);
+            invalidateUserQueries();
+        } else {
+            toast.error(result.error || 'Failed to toggle user status');
+        }
     };
 
     return (

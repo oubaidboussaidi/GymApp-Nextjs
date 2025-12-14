@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -12,50 +11,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search } from 'lucide-react';
-import { enrollUser } from '@/actions/enrollment.actions';
+import { Search, Loader2 } from 'lucide-react';
+import { enrollUser, getStudentEnrollments } from '@/actions/enrollment.actions';
+import { getPrograms } from '@/actions/program.actions';
 import { toast } from 'sonner';
+import { ProgramCard } from '@/components/ProgramCard';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ProgramCardSkeleton } from '@/components/skeletons';
 
-export default function BrowseProgramsClient({ programs, userId, enrollments }: { programs: any[], userId: string, enrollments: any[] }) {
-  const router = useRouter();
+export default function BrowseProgramsClient({ userId }: { userId: string }) {
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('q') || '');
-  const [loading, setLoading] = useState<string | null>(null);
+  const [level, setLevel] = useState(searchParams.get('level') || 'All');
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
-  const enrolledProgramIds = new Set(enrollments.map((e: any) => e.programId._id || e.programId));
+  // Fetch Programs
+  const { data: programs = [], isLoading: isLoadingPrograms } = useQuery({
+    queryKey: ['programs', search, level],
+    queryFn: async () => {
+      return await getPrograms(search, level === 'All' ? undefined : level);
+    },
+  });
+
+  // Fetch Enrollments
+  const { data: enrollments = [], isLoading: isLoadingEnrollments } = useQuery({
+    queryKey: ['enrollments', userId],
+    queryFn: async () => {
+      return await getStudentEnrollments(userId);
+    },
+  });
+
+  const isLoading = isLoadingPrograms || isLoadingEnrollments;
+
+  const enrolledProgramIds = new Set(enrollments.map((e: any) => e.programId?._id || e.programId));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams);
-    if (search) params.set('q', search);
-    else params.delete('q');
-    router.push(`?${params.toString()}`);
-  };
-
-  const handleLevelChange = (value: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (value && value !== 'All') params.set('level', value);
-    else params.delete('level');
-    router.push(`?${params.toString()}`);
   };
 
   const handleEnroll = async (programId: string) => {
-    setLoading(programId);
+    setEnrollingId(programId);
     try {
-        const result = await enrollUser(userId, programId);
-        if (result.error) {
-            toast.error(result.error);
-        } else {
-            toast.success('Successfully enrolled!');
-            router.push('/dashboard/client');
-        }
+      const result = await enrollUser(userId, programId);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success('Successfully enrolled! 🎉');
+        // Invalidate and refetch - list will update after refetch completes
+        await queryClient.invalidateQueries({ queryKey: ['enrollments', userId] });
+        await queryClient.invalidateQueries({ queryKey: ['my-enrollments', userId] });
+        await queryClient.invalidateQueries({ queryKey: ['programs'] });
+      }
     } catch (error) {
-        console.error(error);
-        toast.error('Failed to enroll');
+      console.error(error);
+      toast.error('Failed to enroll');
     } finally {
-        setLoading(null);
+      setEnrollingId(null);
     }
   };
+
+  const filteredPrograms = programs.filter((p: any) => !enrolledProgramIds.has(p._id));
 
   return (
     <>
@@ -72,7 +88,7 @@ export default function BrowseProgramsClient({ programs, userId, enrollments }: 
           </div>
           <Button type="submit">Search</Button>
         </form>
-        <Select onValueChange={handleLevelChange} defaultValue={searchParams.get('level') || 'All'}>
+        <Select onValueChange={setLevel} defaultValue={level}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Level" />
           </SelectTrigger>
@@ -85,38 +101,42 @@ export default function BrowseProgramsClient({ programs, userId, enrollments }: 
         </Select>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {programs.filter(p => !enrolledProgramIds.has(p._id)).map((program) => (
-          <Card key={program._id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{program.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">by {program.coachId.name}</p>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                {program.description}
-              </p>
-              <div className="flex gap-2 text-sm font-medium">
-                <span className="px-2 py-1 bg-secondary rounded-md">{program.level}</span>
-                <span className="px-2 py-1 bg-secondary rounded-md">{program.exercises.length} Exercises</span>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full" 
-                onClick={() => handleEnroll(program._id)}
-                disabled={loading === program._id}
-              >
-                {loading === program._id ? 'Enrolling...' : 'Enroll Now'}
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      {isLoading ? (
+         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
+            {[...Array(6)].map((_, i) => (
+               <ProgramCardSkeleton key={i} />
+            ))}
+         </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
+          {filteredPrograms.map((program: any) => {
+            const isEnrolling = enrollingId === program._id;
+            
+            return (
+              <ProgramCard key={program._id} program={program} showStats>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleEnroll(program._id)}
+                  disabled={isEnrolling}
+                >
+                  {isEnrolling ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enrolling...
+                    </>
+                  ) : (
+                    'Enroll Now'
+                  )}
+                </Button>
+              </ProgramCard>
+            );
+          })}
+        </div>
+      )}
       
-      {programs.length === 0 && (
+      {!isLoading && filteredPrograms.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-            No programs found. Try adjusting your search or filters.
+          No programs found. Try adjusting your search or filters.
         </div>
       )}
     </>

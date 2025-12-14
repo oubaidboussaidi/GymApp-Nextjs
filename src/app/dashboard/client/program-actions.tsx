@@ -13,26 +13,36 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
-export default function ProgramActions({ enrollmentId, programId }: { enrollmentId: string, programId: string }) {
-    const router = useRouter();
+export default function ProgramActions({ enrollmentId, programId }: { enrollmentId: string, programId?: string }) {
     const [openParticipants, setOpenParticipants] = useState(false);
     const [participants, setParticipants] = useState<any[]>([]);
     const [loadingParticipants, setLoadingParticipants] = useState(false);
+    const queryClient = useQueryClient();
 
     const handleLeave = async () => {
-        await kickStudent(enrollmentId);
-        router.refresh();
+        const result = await kickStudent(enrollmentId);
+        if (result.success) {
+            toast.success('Left program successfully');
+            queryClient.invalidateQueries({ queryKey: ['my-enrollments'] });
+            queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+            queryClient.invalidateQueries({ queryKey: ['programs'] });
+        } else {
+            toast.error(result.error || 'Failed to leave program');
+        }
     };
 
     const handleViewParticipants = async () => {
         setLoadingParticipants(true);
         try {
+            if (!programId) return;
             const data = await getProgramStudents(programId);
             setParticipants(data);
         } catch (error) {
             console.error(error);
+            toast.error('Failed to load participants');
         } finally {
             setLoadingParticipants(false);
         }

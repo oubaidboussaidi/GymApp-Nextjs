@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,23 +13,40 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
 
 interface DeleteConfirmationProps {
-  onDelete: () => void;
+  onDelete: () => Promise<void> | void;
   title?: string;
   description?: string;
   trigger?: React.ReactNode;
+  actionLabel?: string;
 }
 
 export default function DeleteConfirmation({
   onDelete,
   title = "Are you absolutely sure?",
   description = "This action cannot be undone. This will permanently delete this item.",
-  trigger
+  trigger,
+  actionLabel = "Delete"
 }: DeleteConfirmationProps) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await onDelete();
+      setOpen(false);
+    } catch (error) {
+      console.error('Delete error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         {trigger || (
             <Button variant="destructive" size="icon">
@@ -44,10 +62,15 @@ export default function DeleteConfirmation({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            Delete
-          </AlertDialogAction>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <Button 
+            onClick={handleDelete} 
+            disabled={loading}
+            variant="destructive"
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {actionLabel}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

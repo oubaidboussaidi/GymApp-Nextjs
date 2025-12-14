@@ -15,10 +15,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CreateCoachForm() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,13 +31,18 @@ export default function CreateCoachForm() {
     try {
         const result = await createCoach(formData);
         if (result.success) {
+            toast.success('Coach created successfully');
             setOpen(false);
             (e.target as HTMLFormElement).reset();
+            // Invalidate user-related queries
+            queryClient.invalidateQueries({ queryKey: ['all-users'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-analytics'] });
         } else {
-            alert(result.error || 'Failed to create coach');
+            toast.error(result.error || 'Failed to create coach');
         }
     } catch (error) {
         console.error(error);
+        toast.error('An error occurred');
     } finally {
         setLoading(false);
     }

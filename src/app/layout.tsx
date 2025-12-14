@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider";
+import QueryProvider from "@/providers/QueryProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,15 +38,17 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider>
-            {children}
-            <Toaster
-              position="top-right"
-              richColors
-              closeButton
-              toastOptions={{
-                duration: 3000,
-              }}
-            />
+            <QueryProvider>
+              {children}
+              <Toaster
+                position="top-center"
+                richColors
+                closeButton
+                toastOptions={{
+                  duration: 3000,
+                }}
+              />
+            </QueryProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

@@ -20,7 +20,8 @@ import {
 } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner'; 
 // The init said toast is deprecated, use sonner. But I installed toast anyway.
 // Let's check if use-toast hook exists. If not, I'll use simple alerts or try to use sonner if installed.
 // I'll assume standard toast for now or just alerts to be safe, then upgrade.
@@ -54,13 +55,16 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
 
       if (result?.error) {
         setError('Invalid Email or Password');
+        toast.error('Invalid Email or Password');
       } else {
         setOpen(false);
+        toast.success('Welcome back!');
         router.refresh();
         router.push('/dashboard');
       }
     } catch (err) {
       setError('An unexpected error occurred');
+      toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -77,13 +81,14 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
       if (result.success) {
         setActiveTab('login');
         setError(null);
-        // Optional: Auto-fill email in login tab or show success message
-        alert('Registration successful! Please login.');
+        toast.success('Registration successful! Please login.');
       } else {
         setError(result.error || 'Registration failed');
+        toast.error(result.error || 'Registration failed');
       }
     } catch (err) {
       setError('An unexpected error occurred');
+      toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);
     }

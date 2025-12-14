@@ -16,12 +16,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Activity } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 
 export default function UpdateStatsForm({ user }: { user: any }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { update: updateSession } = useSession();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,13 +42,19 @@ export default function UpdateStatsForm({ user }: { user: any }) {
         const result = await updateUser(user.id, data);
         if (result.success) {
             setOpen(false);
-            router.refresh();
             toast.success('Stats updated successfully!');
+            // Invalidate user-related queries
+            queryClient.invalidateQueries({ queryKey: ['current-user'] });
+            queryClient.invalidateQueries({ queryKey: ['user', user.id] });
+            queryClient.invalidateQueries({ queryKey: ['all-users'] });
+            // Update session to reflect new stats
+            await updateSession();
         } else {
             toast.error('Failed to update stats');
         }
     } catch (error) {
         console.error(error);
+        toast.error('An error occurred');
     } finally {
         setLoading(false);
     }

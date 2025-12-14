@@ -4,12 +4,14 @@ import dbConnect from '@/lib/db';
 import StatsHistory from '@/models/StatsHistory';
 import User from '@/models/User';
 import { revalidatePath } from 'next/cache';
+import { simulateLatency } from '@/lib/utils';
 
 export async function recordStatsHistory(userId: string, stats: {
     weight?: number;
     squat?: number;
     bench?: number;
 }) {
+    await simulateLatency();
     try {
         await dbConnect();
 
@@ -30,6 +32,7 @@ export async function recordStatsHistory(userId: string, stats: {
 }
 
 export async function getStatsHistory(userId: string, days: number = 30) {
+    await simulateLatency();
     try {
         await dbConnect();
 
@@ -51,6 +54,7 @@ export async function getStatsHistory(userId: string, days: number = 30) {
 }
 
 export async function getStatsAnalytics(userId: string) {
+    await simulateLatency();
     try {
         await dbConnect();
 

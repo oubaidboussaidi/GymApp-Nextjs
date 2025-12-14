@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createProgram } from '@/actions/program.actions';
+import { updateProgram } from '@/actions/program.actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,18 +22,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, X, ImageIcon, Loader2 } from 'lucide-react';
+import { Pencil, X, ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 
-export default function CreateProgramForm({ coachId }: { coachId: string }) {
+interface EditProgramFormProps {
+  program: {
+    _id: string;
+    title: string;
+    description?: string;
+    level: string;
+    image?: string;
+    exercises?: { name: string; sets: number; reps: number }[];
+    coachId?: string | { _id: string };
+  };
+}
+
+export default function EditProgramForm({ program }: EditProgramFormProps) {
   const [open, setOpen] = useState(false);
-  const [exercises, setExercises] = useState<{ name: string; sets: number; reps: number }[]>([]);
+  const [exercises, setExercises] = useState(program.exercises || []);
   const [loading, setLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(program.image || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+
+  const coachId = typeof program.coachId === 'object' ? program.coachId._id : program.coachId;
 
   const addExercise = () => {
     setExercises([...exercises, { name: '', sets: 3, reps: 10 }]);
@@ -63,9 +77,9 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     
-    let imageUrl: string | undefined;
+    let imageUrl: string | undefined = program.image;
     
-    // Upload image if selected
+    // Upload new image if selected
     if (imageFile) {
       const uploadFormData = new FormData();
       uploadFormData.append('file', imageFile);
@@ -91,26 +105,23 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
       description: formData.get('description') as string,
       level: formData.get('level') as any,
       image: imageUrl,
-      coachId: coachId as any,
       exercises: exercises,
     };
 
     try {
-      const result = await createProgram(data);
+      const result = await updateProgram(program._id, data);
       if (result.success) {
         setOpen(false);
-        setExercises([]);
-        setImagePreview(null);
         setImageFile(null);
-        (e.target as HTMLFormElement).reset();
-        toast.success('Program created successfully!');
+        toast.success('Program updated successfully!');
         
         // Invalidate queries
         queryClient.invalidateQueries({ queryKey: ['coach-programs', coachId] });
         queryClient.invalidateQueries({ queryKey: ['programs'] });
         queryClient.invalidateQueries({ queryKey: ['all-programs'] });
+        queryClient.invalidateQueries({ queryKey: ['coach-analytics'] });
       } else {
-        toast.error('Failed to create program');
+        toast.error('Failed to update program');
       }
     } catch (error) {
       console.error(error);
@@ -123,16 +134,15 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Program
+        <Button variant="outline" size="icon">
+          <Pencil className="w-4 h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Program</DialogTitle>
+          <DialogTitle>Edit Program</DialogTitle>
           <DialogDescription>
-            Design a new training program for your students.
+            Update your training program details.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -173,17 +183,17 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
 
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" required placeholder="e.g. Hypertrophy 101" />
+            <Input id="title" name="title" required defaultValue={program.title} />
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the goal of this program..." />
+            <Textarea id="description" name="description" defaultValue={program.description || ''} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="level">Level</Label>
-            <Select name="level" defaultValue="Beginner">
+            <Select name="level" defaultValue={program.level}>
               <SelectTrigger>
                 <SelectValue placeholder="Select level" />
               </SelectTrigger>
@@ -242,7 +252,8 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
 
           <DialogFooter>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Program'}
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>

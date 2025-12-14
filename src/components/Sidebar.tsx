@@ -29,7 +29,7 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const routes = [
     {
-      label: 'Dashboard',
+      label: 'Overview',
       icon: LayoutDashboard,
       href: `/dashboard`,
       roles: ['admin', 'coach', 'client'],
@@ -43,7 +43,7 @@ export default function Sidebar({ role }: SidebarProps) {
     {
       label: 'My Programs',
       icon: Dumbbell,
-      href: `/dashboard/coach`,
+      href: `/dashboard/coach/programs`,
       roles: ['coach'],
     },
     {
@@ -113,23 +113,41 @@ export default function Sidebar({ role }: SidebarProps) {
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="grid gap-1 px-2">
-          {filteredRoutes.map((route) => (
-            <Link
-              key={route.href}
-              href={route.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                "hover:bg-emerald-500/10 hover:text-emerald-600",
-                pathname === route.href
-                  ? "bg-emerald-500/10 text-emerald-600 font-semibold border-r-2 border-emerald-600"
-                  : "text-muted-foreground",
-                collapsed && "justify-center px-2"
-              )}
-            >
-              <route.icon className={cn("h-5 w-5", pathname === route.href && "text-emerald-600")} />
-              {!collapsed && <span>{route.label}</span>}
-            </Link>
-          ))}
+          {filteredRoutes.map((route) => {
+            // Determine if route is active
+            // For Dashboard: match root and role-specific dashboards
+            // For specific routes: exact match only to prevent overlap (e.g., /coach vs /coach/students)
+            let isActive = false;
+            
+            if (route.href === '/dashboard') {
+              // Dashboard matches root or role-specific main pages
+              isActive = pathname === '/dashboard' || 
+                         pathname === '/dashboard/client' || 
+                         pathname === '/dashboard/coach' || 
+                         pathname === '/dashboard/admin';
+            } else {
+              // For all other routes, use exact match only
+              isActive = pathname === route.href;
+            }
+            
+            return (
+              <Link
+                key={route.href}
+                href={route.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  "hover:bg-emerald-500/10 hover:text-emerald-600",
+                  isActive
+                    ? "bg-emerald-500/10 text-emerald-600 font-semibold border-r-2 border-emerald-600"
+                    : "text-muted-foreground",
+                  collapsed && "justify-center px-2"
+                )}
+              >
+                <route.icon className={cn("h-5 w-5", isActive && "text-emerald-600")} />
+                {!collapsed && <span>{route.label}</span>}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
@@ -158,7 +176,7 @@ export default function Sidebar({ role }: SidebarProps) {
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors",
+              "w-full justify-start bg-red-50 text-red-600 hover:bg-red-600 hover:text-white dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white transition-colors",
               collapsed && "justify-center px-0"
             )}
             onClick={() => signOut({ redirectTo: '/' })}

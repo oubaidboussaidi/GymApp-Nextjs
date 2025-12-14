@@ -4,8 +4,10 @@ import dbConnect from '@/lib/db';
 import User, { IUser } from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
+import { simulateLatency } from '@/lib/utils';
 
 export async function registerUser(formData: FormData) {
+  await simulateLatency();
   await dbConnect();
 
   const name = formData.get('name') as string;
@@ -42,6 +44,7 @@ export async function registerUser(formData: FormData) {
 }
 
 export async function updateUser(userId: string, data: Partial<IUser>) {
+  await simulateLatency();
   await dbConnect();
   try {
     // Prevent role update via this action for security
@@ -57,6 +60,7 @@ export async function updateUser(userId: string, data: Partial<IUser>) {
 }
 
 export async function getCoaches() {
+  await simulateLatency();
   await dbConnect();
   try {
     const coaches = await User.find({ role: 'coach' }).select('-password').lean();
@@ -69,6 +73,7 @@ export async function getCoaches() {
 }
 
 export async function deleteUser(userId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     await User.findByIdAndDelete(userId);
@@ -81,6 +86,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function createCoach(formData: FormData) {
+  await simulateLatency();
   await dbConnect();
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;
@@ -114,6 +120,7 @@ export async function createCoach(formData: FormData) {
 }
 
 export async function getAllUsers() {
+  await simulateLatency();
   await dbConnect();
   try {
     const users = await User.find({}).select('-password').lean();
@@ -125,6 +132,7 @@ export async function getAllUsers() {
 }
 
 export async function toggleUserStatus(userId: string) {
+  await simulateLatency();
   await dbConnect();
   try {
     const user = await User.findById(userId);
@@ -144,6 +152,7 @@ export async function toggleUserStatus(userId: string) {
 }
 
 export async function getUserStats() {
+  await simulateLatency();
   await dbConnect();
   try {
     const stats = {
@@ -161,6 +170,7 @@ export async function getUserStats() {
 }
 
 export async function getCoachesList() {
+  await simulateLatency();
   await dbConnect();
   try {
     const coaches = await User.aggregate([
@@ -193,6 +203,7 @@ export async function getCoachesList() {
 }
 
 export async function updateUserByAdmin(userId: string, data: Partial<IUser>) {
+  await simulateLatency();
   await dbConnect();
   try {
     const { password, ...updateData } = data as any;
@@ -206,3 +217,41 @@ export async function updateUserByAdmin(userId: string, data: Partial<IUser>) {
   }
 }
 
+export async function deleteOwnAccount(userId: string) {
+  await simulateLatency();
+  await dbConnect();
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return { error: 'User not found' };
+    }
+    
+    // Prevent admin from deleting their own account via this action
+    if (user.role === 'admin') {
+      return { error: 'Admin accounts cannot be deleted this way' };
+    }
+    
+    // Delete related enrollments
+    const Enrollment = (await import('@/models/Enrollment')).default;
+    await Enrollment.deleteMany({ studentId: userId });
+    
+    // If coach, delete their programs and related enrollments
+    if (user.role === 'coach') {
+      const Program = (await import('@/models/Program')).default;
+      const coachPrograms = await Program.find({ coachId: userId }).select('_id');
+      const programIds = coachPrograms.map((p: any) => p._id);
+      
+      // Delete enrollments in coach's programs
+      await Enrollment.deleteMany({ programId: { $in: programIds } });
+      
+      // Delete coach's programs
+      await Program.deleteMany({ coachId: userId });
+    }
+    
+    await User.findByIdAndDelete(userId);
+    return { success: true };
+  } catch (error) {
+    console.error('Delete own account error:', error);
+    return { error: 'Failed to delete account' };
+  }
+}

@@ -10,6 +10,7 @@ export interface IProgram extends Document {
   title: string;
   description?: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
+  image?: string;
   coachId: mongoose.Types.ObjectId;
   exercises: IExercise[];
   averageRating?: number;
@@ -27,6 +28,7 @@ const ProgramSchema: Schema<IProgram> = new Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
+    image: { type: String },
     level: {
       type: String,
       enum: ['Beginner', 'Intermediate', 'Advanced'],
