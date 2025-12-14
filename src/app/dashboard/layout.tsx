@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import Sidebar from '@/components/Sidebar';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default async function DashboardLayout({
   children,
@@ -14,7 +15,10 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar role={user.role} />
-      <main className="flex-1 p-6 md:p-8 overflow-auto">
+      <main className="flex-1 p-6 md:p-8 overflow-auto relative">
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
         {children}
       </main>
     </div>

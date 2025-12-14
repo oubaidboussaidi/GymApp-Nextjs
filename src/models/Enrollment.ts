@@ -5,6 +5,9 @@ export interface IEnrollment extends Document {
   programId: mongoose.Types.ObjectId;
   joinedAt: Date;
   status: 'active' | 'completed';
+  progress: number;
+  completedExercises: string[];
+  lastActivityDate?: Date;
 }
 
 const EnrollmentSchema: Schema<IEnrollment> = new Schema(
@@ -17,6 +20,9 @@ const EnrollmentSchema: Schema<IEnrollment> = new Schema(
       enum: ['active', 'completed'],
       default: 'active',
     },
+    progress: { type: Number, default: 0, min: 0, max: 100 },
+    completedExercises: [{ type: String }],
+    lastActivityDate: { type: Date },
   },
   { timestamps: true }
 );

@@ -12,6 +12,9 @@ export interface IProgram extends Document {
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   coachId: mongoose.Types.ObjectId;
   exercises: IExercise[];
+  averageRating?: number;
+  totalEnrollments: number;
+  tags?: string[];
 }
 
 const ExerciseSchema: Schema<IExercise> = new Schema({
@@ -31,6 +34,9 @@ const ProgramSchema: Schema<IProgram> = new Schema(
     },
     coachId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     exercises: [ExerciseSchema],
+    averageRating: { type: Number, default: 0 },
+    totalEnrollments: { type: Number, default: 0 },
+    tags: [{ type: String }],
   },
   { timestamps: true }
 );

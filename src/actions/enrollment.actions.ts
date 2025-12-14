@@ -13,6 +13,13 @@ export async function enrollUser(studentId: string, programId: string) {
     }
 
     await Enrollment.create({ studentId, programId });
+
+    // Increment program enrollment count
+    const Program = (await import('@/models/Program')).default;
+    await Program.findByIdAndUpdate(programId, {
+      $inc: { totalEnrollments: 1 },
+    });
+
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
@@ -61,3 +68,101 @@ export async function kickStudent(enrollmentId: string) {
     return { error: 'Failed to remove student' };
   }
 }
+
+export async function updateProgress(enrollmentId: string, progress: number, completedExercises?: string[]) {
+  await dbConnect();
+  try {
+    const updateData: any = {
+      progress,
+      lastActivityDate: new Date(),
+    };
+
+    if (completedExercises) {
+      updateData.completedExercises = completedExercises;
+    }
+
+    if (progress >= 100) {
+      updateData.status = 'completed';
+    }
+
+    await Enrollment.findByIdAndUpdate(enrollmentId, updateData);
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (error) {
+    console.error('Update progress error:', error);
+    return { error: 'Failed to update progress' };
+  }
+}
+
+export async function getCoachStudents(coachId: string) {
+  await dbConnect();
+  try {
+    const Program = (await import('@/models/Program')).default;
+
+    const programs = await Program.find({ coachId }).select('_id').lean();
+    const programIds = programs.map((p) => p._id);
+
+    const enrollments = await Enrollment.find({ programId: { $in: programIds } })
+      .populate('studentId', 'name email image physicalStats age')
+      .populate('programId', 'title level')
+      .sort({ lastActivityDate: -1 })
+      .lean();
+
+    return JSON.parse(JSON.stringify(enrollments));
+  } catch (error) {
+    console.error('Get coach students error:', error);
+    return [];
+  }
+}
+
+export async function getStudentProgress(studentId: string, programId?: string) {
+  await dbConnect();
+  try {
+    const filter: any = { studentId };
+    if (programId) {
+      filter.programId = programId;
+    }
+
+    const enrollments = await Enrollment.find(filter)
+      .populate('programId', 'title exercises')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return JSON.parse(JSON.stringify(enrollments));
+  } catch (error) {
+    console.error('Get student progress error:', error);
+    return [];
+  }
+}
+
+export async function markProgramComplete(enrollmentId: string) {
+  await dbConnect();
+  try {
+    await Enrollment.findByIdAndUpdate(enrollmentId, {
+      status: 'completed',
+      progress: 100,
+      lastActivityDate: new Date(),
+    });
+
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (error) {
+    console.error('Mark program complete error:', error);
+    return { error: 'Failed to mark program as complete' };
+  }
+}
+
+export async function incrementProgramEnrollment(programId: string) {
+  await dbConnect();
+  try {
+    const Program = (await import('@/models/Program')).default;
+    await Program.findByIdAndUpdate(programId, {
+      $inc: { totalEnrollments: 1 },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Increment enrollment error:', error);
+    return { error: 'Failed to update enrollment count' };
+  }
+}
+

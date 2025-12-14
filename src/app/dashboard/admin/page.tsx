@@ -1,96 +1,158 @@
 import { auth } from '@/auth';
-import { getAllUsers, deleteUser, createCoach } from '@/actions/user.actions';
-import { Button } from '@/components/ui/button';
+import { getAdminAnalytics } from '@/actions/analytics.actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trash2, UserPlus } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import CreateCoachForm from './create-coach-form';
-import UserActions from './user-actions';
+import { Users, Dumbbell, TrendingUp, Star } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default async function AdminDashboard() {
-  const session = await auth();
-  const user = session?.user;
-  
-  if (!user || user.role !== 'admin') return null;
+    const session = await auth();
+    const user = session?.user;
 
-  const users = await getAllUsers();
+    if (!user || user.role !== 'admin') return null;
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-            <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
-            <p className="text-muted-foreground">Manage users and system settings.</p>
+    const analyticsResult = await getAdminAnalytics();
+    const analytics = analyticsResult.success ? analyticsResult.data : null;
+
+    return (
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
+                    <p className="text-muted-foreground">Welcome back! Here's your system overview.</p>
+                </div>
+            </div>
+
+            {/* System Metrics */}
+            {analytics && (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.overview.totalUsers}</div>
+                            <p className="text-xs text-muted-foreground">
+                                {analytics.overview.totalCoaches} coaches, {analytics.overview.totalClients} clients
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Programs</CardTitle>
+                            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.overview.totalPrograms}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Created by coaches
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Active Enrollments</CardTitle>
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.overview.activeEnrollments}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Out of {analytics.overview.totalEnrollments} total
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
+                            <Star className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.overview.avgSystemRating.toFixed(1)}</div>
+                            <p className="text-xs text-muted-foreground">
+                                System-wide average
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {/* Quick Actions */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <Link href="/dashboard/admin/users">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-blue-600" />
+                                User Management
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground">
+                                View, edit, and manage all users in the system
+                            </p>
+                        </CardContent>
+                    </Link>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <Link href="/dashboard/admin/analytics">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-emerald-600" />
+                                Analytics
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground">
+                                View detailed charts and system analytics
+                            </p>
+                        </CardContent>
+                    </Link>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <Link href="/dashboard/admin/programs">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Dumbbell className="h-5 w-5 text-purple-600" />
+                                Programs
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground">
+                                Manage all training programs
+                            </p>
+                        </CardContent>
+                    </Link>
+                </Card>
+            </div>
+
+            {/* Recent Activity or other summary info could go here */}
+            {analytics && analytics.recentUsers && analytics.recentUsers.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent User Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            {analytics.recentUsers.slice(0, 5).map((u: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">
+                                        New {u.role} joined
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        {new Date(u.createdAt).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
         </div>
-        <CreateCoachForm />
-      </div>
-
-      <Card>
-        <CardHeader>
-            <CardTitle>All Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {users.map((u: any) => (
-                        <TableRow key={u._id}>
-                            <TableCell className="flex items-center gap-3">
-                                <Avatar>
-                                    <AvatarImage src={u.image} />
-                                    <AvatarFallback>{u.name[0]}</AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium">{u.name}</span>
-                            </TableCell>
-                            <TableCell>{u.email}</TableCell>
-                            <TableCell>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    u.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
-                                    u.role === 'coach' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                }`}>
-                                    {u.role.toUpperCase()}
-                                </span>
-                            </TableCell>
-                            <TableCell>{new Date(u.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell className="text-right">
-                                {u.role !== 'admin' && (
-                                    <UserActions user={u} />
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
+    );
 }

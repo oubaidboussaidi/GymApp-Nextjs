@@ -3,6 +3,7 @@ import { auth, signOut } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Dumbbell } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
+import { ThemeToggle } from './theme-toggle';
 
 export default async function Navbar() {
   const session = await auth();
@@ -15,15 +16,16 @@ export default async function Navbar() {
           <Dumbbell className="h-6 w-6 text-primary" />
           <span>GymCore</span>
         </Link>
-        
+
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           {user ? (
             <>
               <Button asChild variant="ghost">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={async () => {
                   'use server';
                   await signOut({ redirectTo: '/' });

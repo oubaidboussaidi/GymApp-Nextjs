@@ -1,9 +1,9 @@
 'use client';
 
-import { deleteUser, updateUser } from '@/actions/user.actions';
+import { deleteUser, updateUser, toggleUserStatus } from '@/actions/user.actions';
 import DeleteConfirmation from '@/components/DeleteConfirmation';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Power } from 'lucide-react';
 import { useState } from 'react';
 import {
     Dialog,
@@ -34,9 +34,13 @@ export default function UserActions({ user }: { user: any }) {
         const formData = new FormData(e.currentTarget);
         const name = formData.get('name') as string;
         const role = formData.get('role') as 'admin' | 'coach' | 'client';
-        
+
         await updateUser(user._id, { name, role });
         setOpenEdit(false);
+    };
+
+    const handleToggleStatus = async () => {
+        await toggleUserStatus(user._id);
     };
 
     return (
@@ -74,7 +78,16 @@ export default function UserActions({ user }: { user: any }) {
                 </DialogContent>
             </Dialog>
 
-            <DeleteConfirmation 
+            <Button
+                variant={user.isActive ? 'outline' : 'default'}
+                size="icon"
+                onClick={handleToggleStatus}
+                title={user.isActive ? 'Deactivate' : 'Activate'}
+            >
+                <Power className="h-4 w-4" />
+            </Button>
+
+            <DeleteConfirmation
                 onDelete={handleDelete}
                 trigger={
                     <Button variant="destructive" size="icon">

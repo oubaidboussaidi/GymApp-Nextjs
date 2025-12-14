@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
@@ -54,7 +55,19 @@ export default function Sidebar({ role }: SidebarProps) {
     {
       label: 'User Management',
       icon: Users,
-      href: `/dashboard/admin`,
+      href: `/dashboard/admin/users`,
+      roles: ['admin'],
+    },
+    {
+      label: 'Programs',
+      icon: Dumbbell,
+      href: `/dashboard/admin/programs`,
+      roles: ['admin'],
+    },
+    {
+      label: 'Analytics',
+      icon: BarChart3,
+      href: `/dashboard/admin/analytics`,
       roles: ['admin'],
     },
     {
@@ -107,8 +120,8 @@ export default function Sidebar({ role }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 "hover:bg-emerald-500/10 hover:text-emerald-600",
-                pathname === route.href 
-                  ? "bg-emerald-500/10 text-emerald-600 font-semibold border-r-2 border-emerald-600" 
+                pathname === route.href
+                  ? "bg-emerald-500/10 text-emerald-600 font-semibold border-r-2 border-emerald-600"
                   : "text-muted-foreground",
                 collapsed && "justify-center px-2"
               )}

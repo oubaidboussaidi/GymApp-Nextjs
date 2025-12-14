@@ -7,6 +7,7 @@ export interface IUser extends Document {
   role: 'admin' | 'coach' | 'client';
   image?: string;
   age?: number;
+  isActive: boolean;
   physicalStats?: {
     weight?: number;
     squat?: number;
@@ -26,6 +27,7 @@ const UserSchema: Schema<IUser> = new Schema(
     },
     image: { type: String },
     age: { type: Number },
+    isActive: { type: Boolean, default: true },
     physicalStats: {
       weight: { type: Number },
       squat: { type: Number },
