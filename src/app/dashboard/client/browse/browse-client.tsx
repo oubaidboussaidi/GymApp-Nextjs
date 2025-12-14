@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import { enrollUser } from '@/actions/enrollment.actions';
+import { toast } from 'sonner';
 
 export default function BrowseProgramsClient({ programs, userId, enrollments }: { programs: any[], userId: string, enrollments: any[] }) {
   const router = useRouter();
@@ -43,14 +44,14 @@ export default function BrowseProgramsClient({ programs, userId, enrollments }: 
     try {
         const result = await enrollUser(userId, programId);
         if (result.error) {
-            alert(result.error); // Simple alert for now
+            toast.error(result.error);
         } else {
-            alert('Successfully enrolled!');
+            toast.success('Successfully enrolled!');
             router.push('/dashboard/client');
         }
     } catch (error) {
         console.error(error);
-        alert('Failed to enroll');
+        toast.error('Failed to enroll');
     } finally {
         setLoading(null);
     }

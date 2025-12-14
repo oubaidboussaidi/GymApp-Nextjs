@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { updateUser } from '@/actions/user.actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,8 +41,9 @@ export default function UpdateStatsForm({ user }: { user: any }) {
         if (result.success) {
             setOpen(false);
             router.refresh();
+            toast.success('Stats updated successfully!');
         } else {
-            alert('Failed to update stats');
+            toast.error('Failed to update stats');
         }
     } catch (error) {
         console.error(error);

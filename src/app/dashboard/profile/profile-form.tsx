@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ProfileForm({ user }: { user: any }) {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function ProfileForm({ user }: { user: any }) {
             if (data.url) imageUrl = data.url;
         } catch (err) {
             console.error('Upload failed', err);
-            alert('Image upload failed');
+            toast.error('Image upload failed');
             setLoading(false);
             return;
         }
@@ -66,9 +67,9 @@ export default function ProfileForm({ user }: { user: any }) {
         const result = await updateUser(user.id, data);
         if (result.success) {
             router.refresh();
-            alert('Profile updated successfully!');
+            toast.success('Profile updated successfully!');
         } else {
-            alert('Failed to update profile');
+            toast.error('Failed to update profile');
         }
     } catch (error) {
         console.error(error);
