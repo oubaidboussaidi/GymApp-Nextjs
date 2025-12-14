@@ -22,6 +22,12 @@ interface ProgramCardProps {
   showStats?: boolean;
 }
 
+const levelLabels: Record<string, string> = {
+  Beginner: 'Débutant',
+  Intermediate: 'Intermédiaire',
+  Advanced: 'Avancé',
+};
+
 export function ProgramCard({ program, children, showStats = false }: ProgramCardProps) {
   const levelColors: Record<string, string> = {
     Beginner: 'bg-emerald-500/90 hover:bg-emerald-500',
@@ -47,27 +53,27 @@ export function ProgramCard({ program, children, showStats = false }: ProgramCar
         )}
         {/* Level badge overlay */}
         <Badge className={`absolute top-3 right-3 ${levelColors[program.level] || 'bg-secondary'}`}>
-          {program.level}
+          {levelLabels[program.level] || program.level}
         </Badge>
       </div>
       
       <CardHeader className="pb-2">
         <CardTitle className="line-clamp-1">{program.title}</CardTitle>
         {program.coachId?.name && (
-          <p className="text-sm text-muted-foreground">by {program.coachId.name}</p>
+          <p className="text-sm text-muted-foreground">par {program.coachId.name}</p>
         )}
       </CardHeader>
       
       <CardContent className="flex-1">
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {program.description || 'No description provided.'}
+          {program.description || 'Aucune description fournie.'}
         </p>
         
         {/* Stats row */}
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Dumbbell className="h-4 w-4" />
-            <span>{program.exercises?.length || 0} exercises</span>
+            <span>{program.exercises?.length || 0} exercices</span>
           </div>
           {showStats && (
             <>

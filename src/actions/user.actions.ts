@@ -48,14 +48,41 @@ export async function updateUser(userId: string, data: Partial<IUser>) {
   await dbConnect();
   try {
     // Prevent role update via this action for security
-    const { role, password, ...updateData } = data as any;
+    const { role, password, physicalStats, ...otherData } = data as any;
 
-    await User.findByIdAndUpdate(userId, updateData);
+    // Build update object
+    const updateObj: any = { ...otherData };
+
+    // Handle physicalStats with dot notation for partial updates
+    if (physicalStats) {
+      if (physicalStats.weight !== undefined) {
+        updateObj['physicalStats.weight'] = physicalStats.weight;
+      }
+      if (physicalStats.squat !== undefined) {
+        updateObj['physicalStats.squat'] = physicalStats.squat;
+      }
+      if (physicalStats.bench !== undefined) {
+        updateObj['physicalStats.bench'] = physicalStats.bench;
+      }
+    }
+
+    const result = await User.findByIdAndUpdate(
+      userId, 
+      { $set: updateObj },
+      { new: true }
+    );
+
+    if (!result) {
+      return { success: false, error: 'User not found' };
+    }
+
     revalidatePath('/dashboard');
+    revalidatePath('/dashboard/client');
+    revalidatePath('/dashboard/profile');
     return { success: true };
   } catch (error) {
     console.error('Update user error:', error);
-    return { error: 'Failed to update profile' };
+    return { success: false, error: 'Failed to update profile' };
   }
 }
 

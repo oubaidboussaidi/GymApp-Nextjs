@@ -21,15 +21,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner'; 
-// The init said toast is deprecated, use sonner. But I installed toast anyway.
-// Let's check if use-toast hook exists. If not, I'll use simple alerts or try to use sonner if installed.
-// I'll assume standard toast for now or just alerts to be safe, then upgrade.
-// Actually, I'll use a simple alert fallback if toast is missing to avoid build errors, 
-// or just implement a basic UI feedback state.
-// Wait, I saw "Created 12 files... src/components/ui/textarea.tsx" but toast was installed separately?
-// Let's check if hooks/use-toast.ts exists.
-// I'll use local state for errors to be safe.
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function AuthModal({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -54,17 +47,17 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
       });
 
       if (result?.error) {
-        setError('Invalid Email or Password');
-        toast.error('Invalid Email or Password');
+        setError('Email ou mot de passe invalide');
+        toast.error('Email ou mot de passe invalide');
       } else {
         setOpen(false);
-        toast.success('Welcome back!');
+        toast.success('Bon retour parmi nous !');
         router.refresh();
         router.push('/dashboard');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
-      toast.error('An unexpected error occurred');
+      setError('Une erreur inattendue s\'est produite');
+      toast.error('Une erreur inattendue s\'est produite');
     } finally {
       setLoading(false);
     }
@@ -81,14 +74,14 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
       if (result.success) {
         setActiveTab('login');
         setError(null);
-        toast.success('Registration successful! Please login.');
+        toast.success('Inscription réussie ! Veuillez vous connecter.');
       } else {
-        setError(result.error || 'Registration failed');
-        toast.error(result.error || 'Registration failed');
+        setError(result.error || 'Échec de l\'inscription');
+        toast.error(result.error || 'Échec de l\'inscription');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
-      toast.error('An unexpected error occurred');
+      setError('Une erreur inattendue s\'est produite');
+      toast.error('Une erreur inattendue s\'est produite');
     } finally {
       setLoading(false);
     }
@@ -101,16 +94,16 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Welcome to GymCore</DialogTitle>
+          <DialogTitle>Bienvenue sur GymCore</DialogTitle>
           <DialogDescription>
-            Login or create an account to get started.
+            Connectez-vous ou créez un compte pour commencer.
           </DialogDescription>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">Connexion</TabsTrigger>
+            <TabsTrigger value="register">Inscription</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
@@ -122,14 +115,15 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
               )}
               <div className="space-y-2">
                 <Label htmlFor="login-email">Email</Label>
-                <Input id="login-email" name="email" type="email" required placeholder="john@example.com" />
+                <Input id="login-email" name="email" type="email" required placeholder="jean@exemple.fr" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="login-password">Password</Label>
+                <Label htmlFor="login-password">Mot de passe</Label>
                 <Input id="login-password" name="password" type="password" required placeholder="••••••" />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? 'Connexion...' : 'Se Connecter'}
               </Button>
             </form>
           </TabsContent>
@@ -142,23 +136,24 @@ export default function AuthModal({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="register-name">Name</Label>
-                <Input id="register-name" name="name" required placeholder="John Doe" />
+                <Label htmlFor="register-name">Nom</Label>
+                <Input id="register-name" name="name" required placeholder="Jean Dupont" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="register-email">Email</Label>
-                <Input id="register-email" name="email" type="email" required placeholder="john@example.com" />
+                <Input id="register-email" name="email" type="email" required placeholder="jean@exemple.fr" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-password">Password</Label>
+                <Label htmlFor="register-password">Mot de passe</Label>
                 <Input id="register-password" name="password" type="password" required placeholder="••••••" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-age">Age</Label>
+                <Label htmlFor="register-age">Âge</Label>
                 <Input id="register-age" name="age" type="number" required placeholder="25" />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Joining...' : 'Join Now'}
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? 'Inscription...' : 'S\'inscrire'}
               </Button>
             </form>
           </TabsContent>

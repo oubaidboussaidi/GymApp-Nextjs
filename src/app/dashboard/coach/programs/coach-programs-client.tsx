@@ -25,8 +25,8 @@ export default function CoachProgramsClient({ userId }: { userId: string }) {
         </div>
       ) : programs.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed rounded-lg">
-          <h3 className="text-lg font-medium">No programs created yet</h3>
-          <p className="text-muted-foreground mb-4">Create your first program to get started.</p>
+          <h3 className="text-lg font-medium">Aucun programme créé</h3>
+          <p className="text-muted-foreground mb-4">Créez votre premier programme pour commencer.</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -35,7 +35,7 @@ export default function CoachProgramsClient({ userId }: { userId: string }) {
               <div className="flex gap-2 w-full">
                 <Button asChild variant="secondary" className="flex-1">
                   <Link href={`/dashboard/coach/students?programId=${program._id}`}>
-                    Students
+                    Étudiants
                   </Link>
                 </Button>
                 <EditProgramForm program={program} />

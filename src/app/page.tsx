@@ -2,7 +2,6 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dumbbell, TrendingUp, UserCheck } from 'lucide-react';
-import Link from 'next/link';
 import AuthModal from '@/components/auth/AuthModal';
 
 export default function Home() {
@@ -14,20 +13,20 @@ export default function Home() {
         {/* Hero Section */}
         <section className="py-24 md:py-32 px-4 text-center space-y-8 bg-gradient-to-b from-background to-muted/20">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight max-w-3xl mx-auto">
-            Crush Your Goals with <span className="text-primary">GymCore</span>
+            Atteignez vos Objectifs avec <span className="text-primary">GymCore</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            The ultimate platform to manage your training, track progress, and achieve your fitness dreams.
+            La plateforme ultime pour gérer votre entraînement, suivre vos progrès et réaliser vos rêves fitness.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <AuthModal>
               <Button size="lg" className="text-lg px-8">
-                Join Now
+                S'inscrire
               </Button>
             </AuthModal>
             <AuthModal>
               <Button variant="outline" size="lg" className="text-lg px-8">
-                Login
+                Se Connecter
               </Button>
             </AuthModal>
           </div>
@@ -39,33 +38,33 @@ export default function Home() {
             <Card className="bg-card/50 border-muted">
               <CardHeader>
                 <UserCheck className="w-12 h-12 text-primary mb-4" />
-                <CardTitle>Expert Coaches</CardTitle>
+                <CardTitle>Coachs Experts</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Connect with top-tier coaches who will guide you through every step of your journey.
+                  Connectez-vous avec des coachs de haut niveau qui vous guideront à chaque étape de votre parcours.
                 </p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 border-muted">
               <CardHeader>
                 <Dumbbell className="w-12 h-12 text-primary mb-4" />
-                <CardTitle>Custom Programs</CardTitle>
+                <CardTitle>Programmes Personnalisés</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Access personalized training programs tailored to your specific goals and level.
+                  Accédez à des programmes d'entraînement personnalisés adaptés à vos objectifs et votre niveau.
                 </p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 border-muted">
               <CardHeader>
                 <TrendingUp className="w-12 h-12 text-primary mb-4" />
-                <CardTitle>Track Progress</CardTitle>
+                <CardTitle>Suivez vos Progrès</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Visualize your gains with detailed analytics on your weight, lifts, and consistency.
+                  Visualisez vos gains avec des analyses détaillées sur votre poids, vos performances et votre régularité.
                 </p>
               </CardContent>
             </Card>
@@ -74,7 +73,7 @@ export default function Home() {
       </main>
 
       <footer className="py-8 text-center text-sm text-muted-foreground border-t">
-        &copy; {new Date().getFullYear()} GymCore. All rights reserved.
+        &copy; {new Date().getFullYear()} GymCore. Tous droits réservés.
       </footer>
     </div>
   );

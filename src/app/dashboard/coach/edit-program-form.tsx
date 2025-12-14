@@ -79,7 +79,6 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
     
     let imageUrl: string | undefined = program.image;
     
-    // Upload new image if selected
     if (imageFile) {
       const uploadFormData = new FormData();
       uploadFormData.append('file', imageFile);
@@ -93,8 +92,8 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
           imageUrl = uploadData.url;
         }
       } catch (err) {
-        console.error('Upload failed', err);
-        toast.error('Image upload failed');
+        console.error('Échec upload', err);
+        toast.error('Échec du téléchargement de l\'image');
         setLoading(false);
         return;
       }
@@ -113,19 +112,18 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
       if (result.success) {
         setOpen(false);
         setImageFile(null);
-        toast.success('Program updated successfully!');
+        toast.success('Programme mis à jour avec succès !');
         
-        // Invalidate queries
         queryClient.invalidateQueries({ queryKey: ['coach-programs', coachId] });
         queryClient.invalidateQueries({ queryKey: ['programs'] });
         queryClient.invalidateQueries({ queryKey: ['all-programs'] });
         queryClient.invalidateQueries({ queryKey: ['coach-analytics'] });
       } else {
-        toast.error('Failed to update program');
+        toast.error('Échec de la mise à jour du programme');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred');
+      toast.error('Une erreur s\'est produite');
     } finally {
       setLoading(false);
     }
@@ -140,19 +138,19 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Program</DialogTitle>
+          <DialogTitle>Modifier le Programme</DialogTitle>
           <DialogDescription>
-            Update your training program details.
+            Mettez à jour les détails de votre programme d'entraînement.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Thumbnail Upload */}
           <div className="grid gap-2">
-            <Label htmlFor="thumbnail">Program Thumbnail</Label>
+            <Label htmlFor="thumbnail">Image du Programme</Label>
             <div className="relative">
               {imagePreview ? (
                 <div className="relative h-40 rounded-lg overflow-hidden border">
-                  <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                  <Image src={imagePreview} alt="Aperçu" fill className="object-cover" />
                   <Button
                     type="button"
                     variant="destructive"
@@ -169,7 +167,7 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
               ) : (
                 <label className="flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
                   <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Click to upload thumbnail</span>
+                  <span className="text-sm text-muted-foreground">Cliquez pour télécharger une image</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -182,7 +180,7 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Titre</Label>
             <Input id="title" name="title" required defaultValue={program.title} />
           </div>
           
@@ -192,40 +190,40 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="level">Level</Label>
+            <Label htmlFor="level">Niveau</Label>
             <Select name="level" defaultValue={program.level}>
               <SelectTrigger>
-                <SelectValue placeholder="Select level" />
+                <SelectValue placeholder="Sélectionner le niveau" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
+                <SelectItem value="Beginner">Débutant</SelectItem>
+                <SelectItem value="Intermediate">Intermédiaire</SelectItem>
+                <SelectItem value="Advanced">Avancé</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Exercises</Label>
+              <Label>Exercices</Label>
               <Button type="button" variant="outline" size="sm" onClick={addExercise}>
-                Add Exercise
+                Ajouter un Exercice
               </Button>
             </div>
             <div className="space-y-2">
               {exercises.map((ex, i) => (
                 <div key={i} className="flex gap-2 items-end border p-2 rounded-md">
                   <div className="flex-1 grid gap-1">
-                    <Label className="text-xs">Name</Label>
+                    <Label className="text-xs">Nom</Label>
                     <Input 
                       value={ex.name} 
                       onChange={(e) => updateExercise(i, 'name', e.target.value)}
-                      placeholder="Exercise name"
+                      placeholder="Nom de l'exercice"
                       required
                     />
                   </div>
                   <div className="w-20 grid gap-1">
-                    <Label className="text-xs">Sets</Label>
+                    <Label className="text-xs">Séries</Label>
                     <Input 
                       type="number" 
                       value={ex.sets} 
@@ -253,7 +251,7 @@ export default function EditProgramForm({ program }: EditProgramFormProps) {
           <DialogFooter>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? 'Enregistrement...' : 'Enregistrer'}
             </Button>
           </DialogFooter>
         </form>

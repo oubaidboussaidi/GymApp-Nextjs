@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { updateUser, deleteOwnAccount } from '@/actions/user.actions';
+import { getUserProfile } from '@/actions/profile.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,18 +19,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
 import { Loader2, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { signOut, useSession } from 'next-auth/react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfileForm({ userId }: { userId: string }) {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: session, update: updateSession } = useSession();
-  const user = session?.user;
+  const { update: updateSession } = useSession();
+  
+  // Fetch user profile from database for accurate data
+  const { data: profileResult, isLoading } = useQuery({
+    queryKey: ['user-profile', userId],
+    queryFn: async () => await getUserProfile(userId),
+  });
+
+  const user = profileResult?.success ? profileResult.data : null;
   
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -38,11 +45,9 @@ export default function ProfileForm({ userId }: { userId: string }) {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Show preview immediately
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
 
-      // Upload immediately
       const formData = new FormData();
       formData.append('file', file);
 
@@ -54,19 +59,20 @@ export default function ProfileForm({ userId }: { userId: string }) {
         const data = await res.json();
 
         if (data.url) {
-          // Update user with new image URL
           const result = await updateUser(userId, { image: data.url });
           if (result.success) {
-            toast.success('Profile image updated');
+            toast.success('Photo de profil mise à jour');
+            queryClient.invalidateQueries({ queryKey: ['user-profile', userId] });
+            queryClient.invalidateQueries({ queryKey: ['current-user'] });
             await updateSession();
           } else {
-            toast.error('Failed to update profile image');
+            toast.error('Échec de la mise à jour');
             setPreviewUrl(null);
           }
         }
       } catch (error) {
-        console.error('Upload error:', error);
-        toast.error('Failed to upload image');
+        console.error('Erreur upload:', error);
+        toast.error('Échec du téléchargement');
         setPreviewUrl(null);
       }
     }
@@ -77,37 +83,44 @@ export default function ProfileForm({ userId }: { userId: string }) {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const updateData: any = {
-      name: formData.get('name') as string,
-    };
+    
+    const name = formData.get('name') as string;
+    const weight = formData.get('weight') as string;
+    const squat = formData.get('squat') as string;
+    const bench = formData.get('bench') as string;
 
-    // Only update physicalStats if provided
-    const weight = formData.get('weight');
-    const squat = formData.get('squat');
-    const bench = formData.get('bench');
+    const updateData: any = { name };
 
-    if (weight || squat || bench) {
-      updateData.physicalStats = {
-        weight: weight ? parseFloat(weight as string) : undefined,
-        squat: squat ? parseFloat(squat as string) : undefined,
-        bench: bench ? parseFloat(bench as string) : undefined,
-      };
+    // Build physicalStats object
+    const physicalStats: any = {};
+    if (weight && !isNaN(parseFloat(weight))) {
+      physicalStats.weight = parseFloat(weight);
+    }
+    if (squat && !isNaN(parseFloat(squat))) {
+      physicalStats.squat = parseFloat(squat);
+    }
+    if (bench && !isNaN(parseFloat(bench))) {
+      physicalStats.bench = parseFloat(bench);
+    }
+
+    if (Object.keys(physicalStats).length > 0) {
+      updateData.physicalStats = physicalStats;
     }
 
     try {
       const result = await updateUser(userId, updateData);
       if (result.success) {
-        toast.success('Profile updated successfully');
-        queryClient.invalidateQueries({ queryKey: ['user', userId] });
+        toast.success('Profil mis à jour avec succès');
+        queryClient.invalidateQueries({ queryKey: ['user-profile', userId] });
         queryClient.invalidateQueries({ queryKey: ['current-user'] });
         queryClient.invalidateQueries({ queryKey: ['all-users'] });
         await updateSession();
       } else {
-        toast.error(result.error || 'Failed to update profile');
+        toast.error(result.error || 'Échec de la mise à jour');
       }
     } catch (error) {
-      console.error('Update error:', error);
-      toast.error('Failed to update profile');
+      console.error('Erreur:', error);
+      toast.error('Échec de la mise à jour');
     } finally {
       setLoading(false);
     }
@@ -118,21 +131,31 @@ export default function ProfileForm({ userId }: { userId: string }) {
     try {
       const result = await deleteOwnAccount(userId);
       if (result.success) {
-        toast.success('Account deleted successfully');
-        queryClient.invalidateQueries({ queryKey: ['user', userId] });
-        queryClient.invalidateQueries({ queryKey: ['current-user'] });
-        queryClient.invalidateQueries({ queryKey: ['all-users'] });
+        toast.success('Compte supprimé avec succès');
         await signOut({ redirectTo: '/' });
       } else {
-        toast.error(result.error || 'Failed to delete account');
+        toast.error(result.error || 'Échec de la suppression');
       }
     } catch (error) {
-      console.error('Delete error:', error);
-      toast.error('Failed to delete account');
+      console.error('Erreur:', error);
+      toast.error('Échec de la suppression');
     } finally {
       setDeleteLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Skeleton className="h-96 rounded-xl" />
+        </div>
+        <div>
+          <Skeleton className="h-40 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
@@ -142,12 +165,12 @@ export default function ProfileForm({ userId }: { userId: string }) {
       <div className="lg:col-span-2 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Identity</CardTitle>
-          <CardDescription>Update your personal information.</CardDescription>
+          <CardTitle>Identité</CardTitle>
+          <CardDescription>Mettez à jour vos informations personnelles.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Avatar with clickable upload overlay */}
+            {/* Avatar */}
             <div className="flex items-center gap-6">
               <div className="relative group">
                 <Avatar className="h-24 w-24">
@@ -176,29 +199,30 @@ export default function ProfileForm({ userId }: { userId: string }) {
 
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nom</Label>
                 <Input id="name" name="name" defaultValue={user.name || ''} />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" name="email" defaultValue={user.email || ''} disabled />
-                <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
+                <p className="text-xs text-muted-foreground">L'email ne peut pas être modifié.</p>
               </div>
             </div>
 
-            {/* Physical Stats Section */}
+            {/* Physical Stats */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Physical Stats</h4>
+              <h4 className="text-sm font-medium">Statistiques Physiques</h4>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="grid gap-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Label htmlFor="weight">Poids (kg)</Label>
                   <Input
                     id="weight"
                     name="weight"
                     type="number"
+                    step="0.1"
                     placeholder="70"
-                    defaultValue={(user as any).physicalStats?.weight || ''}
+                    defaultValue={user.physicalStats?.weight || ''}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -207,18 +231,20 @@ export default function ProfileForm({ userId }: { userId: string }) {
                     id="squat"
                     name="squat"
                     type="number"
+                    step="2.5"
                     placeholder="100"
-                    defaultValue={(user as any).physicalStats?.squat || ''}
+                    defaultValue={user.physicalStats?.squat || ''}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="bench">Bench Max (kg)</Label>
+                  <Label htmlFor="bench">Développé Couché (kg)</Label>
                   <Input
                     id="bench"
                     name="bench"
                     type="number"
+                    step="2.5"
                     placeholder="80"
-                    defaultValue={(user as any).physicalStats?.bench || ''}
+                    defaultValue={user.physicalStats?.bench || ''}
                   />
                 </div>
               </div>
@@ -227,7 +253,7 @@ export default function ProfileForm({ userId }: { userId: string }) {
             <div className="flex justify-end">
               <Button type="submit" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                Enregistrer
               </Button>
             </div>
           </form>
@@ -235,60 +261,60 @@ export default function ProfileForm({ userId }: { userId: string }) {
       </Card>
       </div>
 
-      {/* Sidebar Column - Settings & Danger Zone */}
+      {/* Sidebar Column */}
       <div className="space-y-6">
-      {/* Appearance Card */}
+      {/* Appearance */}
       <Card>
         <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>Customize your visual preferences.</CardDescription>
+          <CardTitle>Apparence</CardTitle>
+          <CardDescription>Personnalisez vos préférences visuelles.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Theme</p>
-              <p className="text-sm text-muted-foreground">Switch between light and dark mode.</p>
+              <p className="font-medium">Thème</p>
+              <p className="text-sm text-muted-foreground">Basculer entre mode clair et sombre.</p>
             </div>
             <ThemeToggle />
           </div>
         </CardContent>
       </Card>
 
-      {/* Danger Zone - Only visible to non-admin users */}
+      {/* Danger Zone */}
       {user.role !== 'admin' && (
         <Card className="border-destructive/50">
           <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            <CardDescription>Irreversible actions for your account.</CardDescription>
+            <CardTitle className="text-destructive">Zone Dangereuse</CardTitle>
+            <CardDescription>Actions irréversibles pour votre compte.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Delete Account</p>
-                <p className="text-sm text-muted-foreground">Permanently remove your account and all data.</p>
+                <p className="font-medium">Supprimer le Compte</p>
+                <p className="text-sm text-muted-foreground">Supprime définitivement votre compte.</p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm" disabled={deleteLoading}>
                     {deleteLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Delete
+                    Supprimer
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove all your data from our servers.
+                      Cette action est irréversible. Cela supprimera définitivement votre compte
+                      et toutes vos données de nos serveurs.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      Delete Account
+                      Supprimer le Compte
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

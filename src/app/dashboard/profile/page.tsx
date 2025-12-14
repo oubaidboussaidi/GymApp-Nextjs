@@ -8,7 +8,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight">Profile Settings</h2>
+      <h2 className="text-3xl font-bold tracking-tight">Paramètres du Profil</h2>
       <ProfileForm userId={session.user.id} />
     </div>
   );

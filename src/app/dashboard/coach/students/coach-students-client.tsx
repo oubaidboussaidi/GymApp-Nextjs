@@ -50,8 +50,8 @@ export default function CoachStudentsClient({ userId }: { userId: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Manage Students</h2>
-        <p className="text-muted-foreground">View and manage students enrolled in your programs.</p>
+        <h2 className="text-3xl font-bold tracking-tight">Gérer les Étudiants</h2>
+        <p className="text-muted-foreground">Voir et gérer les étudiants inscrits à vos programmes.</p>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-2">
@@ -70,7 +70,7 @@ export default function CoachStudentsClient({ userId }: { userId: string }) {
 
       <Card>
         <CardHeader>
-            <CardTitle>Enrolled Students</CardTitle>
+            <CardTitle>Étudiants Inscrits</CardTitle>
         </CardHeader>
         <CardContent>
             {isLoadingStudents ? (
@@ -80,14 +80,14 @@ export default function CoachStudentsClient({ userId }: { userId: string }) {
                     ))}
                  </div>
             ) : students.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No students enrolled in this program yet.</p>
+                <p className="text-muted-foreground text-center py-8">Aucun étudiant inscrit à ce programme pour le moment.</p>
             ) : (
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Student</TableHead>
+                            <TableHead>Étudiant</TableHead>
                             <TableHead>Email</TableHead>
-                            <TableHead>Joined</TableHead>
+                            <TableHead>Date d'inscription</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -102,7 +102,7 @@ export default function CoachStudentsClient({ userId }: { userId: string }) {
                                     <span className="font-medium">{enrollment.studentId.name}</span>
                                 </TableCell>
                                 <TableCell>{enrollment.studentId.email}</TableCell>
-                                <TableCell>{new Date(enrollment.joinedAt).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(enrollment.joinedAt).toLocaleDateString('fr-FR')}</TableCell>
                                 <TableCell className="text-right">
                                     <StudentActions enrollmentId={enrollment._id} />
                                 </TableCell>

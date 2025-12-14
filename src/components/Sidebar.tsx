@@ -29,49 +29,49 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const routes = [
     {
-      label: 'Overview',
+      label: 'Aperçu',
       icon: LayoutDashboard,
       href: `/dashboard`,
       roles: ['admin', 'coach', 'client'],
     },
     {
-      label: 'Browse Programs',
+      label: 'Parcourir',
       icon: Dumbbell,
       href: `/dashboard/client/browse`,
       roles: ['client'],
     },
     {
-      label: 'My Programs',
+      label: 'Mes Programmes',
       icon: Dumbbell,
       href: `/dashboard/coach/programs`,
       roles: ['coach'],
     },
     {
-      label: 'Manage Students',
+      label: 'Mes Étudiants',
       icon: Users,
       href: `/dashboard/coach/students`,
       roles: ['coach'],
     },
     {
-      label: 'User Management',
+      label: 'Utilisateurs',
       icon: Users,
       href: `/dashboard/admin/users`,
       roles: ['admin'],
     },
     {
-      label: 'Programs',
+      label: 'Programmes',
       icon: Dumbbell,
       href: `/dashboard/admin/programs`,
       roles: ['admin'],
     },
     {
-      label: 'Analytics',
+      label: 'Analytiques',
       icon: BarChart3,
       href: `/dashboard/admin/analytics`,
       roles: ['admin'],
     },
     {
-      label: 'Profile',
+      label: 'Profil',
       icon: Settings,
       href: `/dashboard/profile`,
       roles: ['admin', 'coach', 'client'],
@@ -115,18 +115,14 @@ export default function Sidebar({ role }: SidebarProps) {
         <nav className="grid gap-1 px-2">
           {filteredRoutes.map((route) => {
             // Determine if route is active
-            // For Dashboard: match root and role-specific dashboards
-            // For specific routes: exact match only to prevent overlap (e.g., /coach vs /coach/students)
             let isActive = false;
             
             if (route.href === '/dashboard') {
-              // Dashboard matches root or role-specific main pages
               isActive = pathname === '/dashboard' || 
                          pathname === '/dashboard/client' || 
                          pathname === '/dashboard/coach' || 
                          pathname === '/dashboard/admin';
             } else {
-              // For all other routes, use exact match only
               isActive = pathname === route.href;
             }
             
@@ -182,7 +178,7 @@ export default function Sidebar({ role }: SidebarProps) {
             onClick={() => signOut({ redirectTo: '/' })}
           >
             <LogOut className={cn("h-5 w-5", !collapsed && "mr-2")} />
-            {!collapsed && "Logout"}
+            {!collapsed && "Déconnexion"}
           </Button>
         </div>
       </div>

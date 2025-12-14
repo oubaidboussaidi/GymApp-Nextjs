@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Activity } from 'lucide-react';
+import { Activity, Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 
@@ -30,31 +30,53 @@ export default function UpdateStatsForm({ user }: { user: any }) {
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     
-    const data = {
-        physicalStats: {
-            weight: parseFloat(formData.get('weight') as string),
-            squat: parseFloat(formData.get('squat') as string),
-            bench: parseFloat(formData.get('bench') as string),
-        }
-    };
+    const weight = formData.get('weight') as string;
+    const squat = formData.get('squat') as string;
+    const bench = formData.get('bench') as string;
+    
+    const physicalStats: { weight?: number; squat?: number; bench?: number } = {};
+    
+    if (weight && !isNaN(parseFloat(weight))) {
+      physicalStats.weight = parseFloat(weight);
+    }
+    if (squat && !isNaN(parseFloat(squat))) {
+      physicalStats.squat = parseFloat(squat);
+    }
+    if (bench && !isNaN(parseFloat(bench))) {
+      physicalStats.bench = parseFloat(bench);
+    }
+
+    if (Object.keys(physicalStats).length === 0) {
+      toast.error('Veuillez remplir au moins un champ');
+      setLoading(false);
+      return;
+    }
+
+    const userId = user.id || user._id;
+    
+    if (!userId) {
+      toast.error('ID utilisateur manquant');
+      setLoading(false);
+      return;
+    }
 
     try {
-        const result = await updateUser(user.id, data);
+        const result = await updateUser(userId, { physicalStats });
         if (result.success) {
             setOpen(false);
-            toast.success('Stats updated successfully!');
-            // Invalidate user-related queries
+            toast.success('Statistiques mises à jour !');
+            // Invalidate all user-related queries
             queryClient.invalidateQueries({ queryKey: ['current-user'] });
-            queryClient.invalidateQueries({ queryKey: ['user', user.id] });
+            queryClient.invalidateQueries({ queryKey: ['user'] });
             queryClient.invalidateQueries({ queryKey: ['all-users'] });
-            // Update session to reflect new stats
+            // Update session to sync with new data
             await updateSession();
         } else {
-            toast.error('Failed to update stats');
+            toast.error(result.error || 'Échec de la mise à jour');
         }
     } catch (error) {
-        console.error(error);
-        toast.error('An error occurred');
+        console.error('Update stats error:', error);
+        toast.error('Une erreur s\'est produite');
     } finally {
         setLoading(false);
     }
@@ -65,35 +87,57 @@ export default function UpdateStatsForm({ user }: { user: any }) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
             <Activity className="w-4 h-4 mr-2" />
-            Quick Update Stats
+            Mise à Jour Rapide
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Physical Stats</DialogTitle>
+          <DialogTitle>Mettre à Jour les Stats</DialogTitle>
           <DialogDescription>
-            Quickly update your lifting stats. For name and profile picture changes, visit your Profile page.
+            Mettez rapidement à jour vos performances. Pour le nom et la photo, rendez-vous sur la page Profil.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="weight">Weight (kg)</Label>
-                    <Input id="weight" name="weight" type="number" step="0.1" defaultValue={user.physicalStats?.weight} required />
+                    <Label htmlFor="weight">Poids (kg)</Label>
+                    <Input 
+                      id="weight" 
+                      name="weight" 
+                      type="number" 
+                      step="0.1" 
+                      defaultValue={user.physicalStats?.weight || ''} 
+                      placeholder="70"
+                    />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="squat">Squat (kg)</Label>
-                    <Input id="squat" name="squat" type="number" step="2.5" defaultValue={user.physicalStats?.squat} required />
+                    <Input 
+                      id="squat" 
+                      name="squat" 
+                      type="number" 
+                      step="2.5" 
+                      defaultValue={user.physicalStats?.squat || ''} 
+                      placeholder="100"
+                    />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="bench">Bench (kg)</Label>
-                    <Input id="bench" name="bench" type="number" step="2.5" defaultValue={user.physicalStats?.bench} required />
+                    <Label htmlFor="bench">Développé (kg)</Label>
+                    <Input 
+                      id="bench" 
+                      name="bench" 
+                      type="number" 
+                      step="2.5" 
+                      defaultValue={user.physicalStats?.bench || ''} 
+                      placeholder="80"
+                    />
                 </div>
             </div>
 
             <DialogFooter>
                 <Button type="submit" disabled={loading}>
-                    {loading ? 'Saving...' : 'Save Stats'}
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {loading ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
             </DialogFooter>
         </form>

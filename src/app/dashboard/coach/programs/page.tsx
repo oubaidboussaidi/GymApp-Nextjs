@@ -12,8 +12,8 @@ export default async function CoachProgramsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">My Programs</h2>
-          <p className="text-muted-foreground">Create and manage your training programs.</p>
+          <h2 className="text-3xl font-bold tracking-tight">Mes Programmes</h2>
+          <p className="text-muted-foreground">Créer et gérer vos programmes d'entraînement.</p>
         </div>
         <CreateProgramForm coachId={user.id} />
       </div>

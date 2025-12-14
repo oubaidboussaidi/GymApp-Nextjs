@@ -25,10 +25,10 @@ interface DeleteConfirmationProps {
 
 export default function DeleteConfirmation({
   onDelete,
-  title = "Are you absolutely sure?",
-  description = "This action cannot be undone. This will permanently delete this item.",
+  title = "Êtes-vous absolument sûr ?",
+  description = "Cette action est irréversible. Cela supprimera définitivement cet élément.",
   trigger,
-  actionLabel = "Delete"
+  actionLabel = "Supprimer"
 }: DeleteConfirmationProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ export default function DeleteConfirmation({
       await onDelete();
       setOpen(false);
     } catch (error) {
-      console.error('Delete error:', error);
+      console.error('Erreur suppression:', error);
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export default function DeleteConfirmation({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>Annuler</AlertDialogCancel>
           <Button 
             onClick={handleDelete} 
             disabled={loading}

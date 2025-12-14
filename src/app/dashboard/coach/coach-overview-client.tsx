@@ -28,52 +28,52 @@ export default function CoachOverviewClient({ userId }: { userId: string }) {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Programs</CardTitle>
+              <CardTitle className="text-sm font-medium">Programmes</CardTitle>
               <Dumbbell className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.overview.totalPrograms}</div>
               <p className="text-xs text-muted-foreground">
-                Created by you
+                Créés par vous
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
+              <CardTitle className="text-sm font-medium">Inscriptions</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.overview.totalEnrollments}</div>
               <p className="text-xs text-muted-foreground">
-                Across all programs
+                Sur tous les programmes
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+              <CardTitle className="text-sm font-medium">Étudiants Actifs</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.overview.totalActiveStudents}</div>
               <p className="text-xs text-muted-foreground">
-                Currently enrolled
+                Actuellement inscrits
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
+              <CardTitle className="text-sm font-medium">Note Moyenne</CardTitle>
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.overview.avgRating.toFixed(1)}</div>
               <p className="text-xs text-muted-foreground">
-                From student reviews
+                Avis des étudiants
               </p>
             </CardContent>
           </Card>
@@ -87,12 +87,12 @@ export default function CoachOverviewClient({ userId }: { userId: string }) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Dumbbell className="h-5 w-5 text-emerald-600" />
-                My Programs
+                Mes Programmes
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Create and manage your training programs
+                Créer et gérer vos programmes d'entraînement
               </p>
             </CardContent>
           </Link>
@@ -103,12 +103,12 @@ export default function CoachOverviewClient({ userId }: { userId: string }) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-blue-600" />
-                Manage Students
+                Gérer les Étudiants
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                View and manage students enrolled in your programs
+                Voir et gérer les étudiants inscrits à vos programmes
               </p>
             </CardContent>
           </Link>
@@ -119,7 +119,7 @@ export default function CoachOverviewClient({ userId }: { userId: string }) {
       {analytics && analytics.programs && analytics.programs.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Your Programs Performance</CardTitle>
+            <CardTitle>Performance de vos Programmes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

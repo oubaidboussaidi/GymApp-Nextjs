@@ -12,26 +12,26 @@ export default function StudentActions({ enrollmentId }: { enrollmentId: string 
     const handleKick = async () => {
         const result = await kickStudent(enrollmentId);
         if (result.success) {
-            toast.success('Student removed from program');
-            // Invalidate all relevant queries
+            toast.success('Étudiant retiré du programme');
             queryClient.invalidateQueries({ queryKey: ['program-students'] });
             queryClient.invalidateQueries({ queryKey: ['enrollments'] });
             queryClient.invalidateQueries({ queryKey: ['programs'] });
             queryClient.invalidateQueries({ queryKey: ['coach-programs'] });
             queryClient.invalidateQueries({ queryKey: ['admin-analytics'] });
         } else {
-            toast.error(result.error || 'Failed to remove student');
+            toast.error(result.error || 'Échec du retrait de l\'étudiant');
         }
     };
 
     return (
         <DeleteConfirmation 
             onDelete={handleKick}
-            title="Kick Student?"
-            description="Are you sure you want to remove this student from the program?"
+            title="Retirer l'étudiant ?"
+            description="Êtes-vous sûr de vouloir retirer cet étudiant du programme ?"
+            actionLabel="Retirer"
             trigger={
                 <Button variant="destructive" size="sm">
-                    Kick
+                    Retirer
                 </Button>
             }
         />

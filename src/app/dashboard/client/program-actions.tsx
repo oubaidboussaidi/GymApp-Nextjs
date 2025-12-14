@@ -3,7 +3,7 @@
 import { kickStudent, getProgramStudents } from '@/actions/enrollment.actions';
 import DeleteConfirmation from '@/components/DeleteConfirmation';
 import { Button } from '@/components/ui/button';
-import { Users, LogOut } from 'lucide-react';
+import { Users, LogOut, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import {
     Dialog,
@@ -25,12 +25,12 @@ export default function ProgramActions({ enrollmentId, programId }: { enrollment
     const handleLeave = async () => {
         const result = await kickStudent(enrollmentId);
         if (result.success) {
-            toast.success('Left program successfully');
+            toast.success('Programme quitté avec succès');
             queryClient.invalidateQueries({ queryKey: ['my-enrollments'] });
             queryClient.invalidateQueries({ queryKey: ['enrollments'] });
             queryClient.invalidateQueries({ queryKey: ['programs'] });
         } else {
-            toast.error(result.error || 'Failed to leave program');
+            toast.error(result.error || 'Échec pour quitter le programme');
         }
     };
 
@@ -42,7 +42,7 @@ export default function ProgramActions({ enrollmentId, programId }: { enrollment
             setParticipants(data);
         } catch (error) {
             console.error(error);
-            toast.error('Failed to load participants');
+            toast.error('Échec du chargement des participants');
         } finally {
             setLoadingParticipants(false);
         }
@@ -54,18 +54,20 @@ export default function ProgramActions({ enrollmentId, programId }: { enrollment
                 <DialogTrigger asChild>
                     <Button variant="outline" size="sm" onClick={handleViewParticipants}>
                         <Users className="h-4 w-4 mr-2" />
-                        Classmates
+                        Participants
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Classmates</DialogTitle>
+                        <DialogTitle>Participants</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         {loadingParticipants ? (
-                            <p>Loading...</p>
+                            <div className="flex items-center justify-center py-4">
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                            </div>
                         ) : participants.length === 0 ? (
-                            <p>No other students enrolled.</p>
+                            <p className="text-muted-foreground text-center py-4">Aucun autre étudiant inscrit.</p>
                         ) : (
                             participants.map((p) => (
                                 <div key={p._id} className="flex items-center gap-3">
@@ -75,7 +77,7 @@ export default function ProgramActions({ enrollmentId, programId }: { enrollment
                                     </Avatar>
                                     <div>
                                         <p className="font-medium">{p.studentId.name}</p>
-                                        <p className="text-xs text-muted-foreground">Joined {new Date(p.joinedAt).toLocaleDateString()}</p>
+                                        <p className="text-xs text-muted-foreground">Inscrit le {new Date(p.joinedAt).toLocaleDateString('fr-FR')}</p>
                                     </div>
                                 </div>
                             ))
@@ -86,12 +88,13 @@ export default function ProgramActions({ enrollmentId, programId }: { enrollment
 
             <DeleteConfirmation 
                 onDelete={handleLeave}
-                title="Leave Program?"
-                description="Are you sure you want to leave this program? Your progress will be lost."
+                title="Quitter le programme ?"
+                description="Êtes-vous sûr de vouloir quitter ce programme ? Votre progression sera perdue."
+                actionLabel="Quitter"
                 trigger={
                     <Button variant="destructive" size="sm">
                         <LogOut className="h-4 w-4 mr-2" />
-                        Leave
+                        Quitter
                     </Button>
                 }
             />

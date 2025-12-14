@@ -20,7 +20,7 @@ export default async function Navbar() {
           {user ? (
             <>
               <Button asChild variant="ghost">
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">Tableau de Bord</Link>
               </Button>
               <Button
                 variant="outline"
@@ -29,16 +29,16 @@ export default async function Navbar() {
                   await signOut({ redirectTo: '/' });
                 }}
               >
-                Logout
+                Déconnexion
               </Button>
             </>
           ) : (
             <div className="flex items-center gap-2">
               <AuthModal>
-                <Button variant="ghost">Login</Button>
+                <Button variant="ghost">Connexion</Button>
               </AuthModal>
               <AuthModal>
-                <Button>Register</Button>
+                <Button>S'inscrire</Button>
               </AuthModal>
             </div>
           )}

@@ -57,15 +57,14 @@ export default function BrowseProgramsClient({ userId }: { userId: string }) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success('Successfully enrolled! 🎉');
-        // Invalidate and refetch - list will update after refetch completes
+        toast.success('Inscription réussie ! 🎉');
         await queryClient.invalidateQueries({ queryKey: ['enrollments', userId] });
         await queryClient.invalidateQueries({ queryKey: ['my-enrollments', userId] });
         await queryClient.invalidateQueries({ queryKey: ['programs'] });
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to enroll');
+      toast.error('Échec de l\'inscription');
     } finally {
       setEnrollingId(null);
     }
@@ -80,23 +79,23 @@ export default function BrowseProgramsClient({ userId }: { userId: string }) {
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search programs..."
+              placeholder="Rechercher des programmes..."
               className="pl-8"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button type="submit">Search</Button>
+          <Button type="submit">Rechercher</Button>
         </form>
         <Select onValueChange={setLevel} defaultValue={level}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Level" />
+            <SelectValue placeholder="Niveau" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="All">All Levels</SelectItem>
-            <SelectItem value="Beginner">Beginner</SelectItem>
-            <SelectItem value="Intermediate">Intermediate</SelectItem>
-            <SelectItem value="Advanced">Advanced</SelectItem>
+            <SelectItem value="All">Tous les Niveaux</SelectItem>
+            <SelectItem value="Beginner">Débutant</SelectItem>
+            <SelectItem value="Intermediate">Intermédiaire</SelectItem>
+            <SelectItem value="Advanced">Avancé</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -122,10 +121,10 @@ export default function BrowseProgramsClient({ userId }: { userId: string }) {
                   {isEnrolling ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Enrolling...
+                      Inscription...
                     </>
                   ) : (
-                    'Enroll Now'
+                    'S\'inscrire'
                   )}
                 </Button>
               </ProgramCard>
@@ -136,7 +135,7 @@ export default function BrowseProgramsClient({ userId }: { userId: string }) {
       
       {!isLoading && filteredPrograms.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          No programs found. Try adjusting your search or filters.
+          Aucun programme trouvé. Essayez d'ajuster votre recherche ou vos filtres.
         </div>
       )}
     </>

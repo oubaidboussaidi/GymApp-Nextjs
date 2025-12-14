@@ -65,7 +65,6 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
     
     let imageUrl: string | undefined;
     
-    // Upload image if selected
     if (imageFile) {
       const uploadFormData = new FormData();
       uploadFormData.append('file', imageFile);
@@ -79,8 +78,8 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
           imageUrl = uploadData.url;
         }
       } catch (err) {
-        console.error('Upload failed', err);
-        toast.error('Image upload failed');
+        console.error('Échec upload', err);
+        toast.error('Échec du téléchargement de l\'image');
         setLoading(false);
         return;
       }
@@ -103,18 +102,17 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
         setImagePreview(null);
         setImageFile(null);
         (e.target as HTMLFormElement).reset();
-        toast.success('Program created successfully!');
+        toast.success('Programme créé avec succès !');
         
-        // Invalidate queries
         queryClient.invalidateQueries({ queryKey: ['coach-programs', coachId] });
         queryClient.invalidateQueries({ queryKey: ['programs'] });
         queryClient.invalidateQueries({ queryKey: ['all-programs'] });
       } else {
-        toast.error('Failed to create program');
+        toast.error('Échec de la création du programme');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred');
+      toast.error('Une erreur s\'est produite');
     } finally {
       setLoading(false);
     }
@@ -125,24 +123,24 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
       <DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
-          Create Program
+          Créer un Programme
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Program</DialogTitle>
+          <DialogTitle>Créer un Nouveau Programme</DialogTitle>
           <DialogDescription>
-            Design a new training program for your students.
+            Concevez un nouveau programme d'entraînement pour vos étudiants.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Thumbnail Upload */}
           <div className="grid gap-2">
-            <Label htmlFor="thumbnail">Program Thumbnail</Label>
+            <Label htmlFor="thumbnail">Image du Programme</Label>
             <div className="relative">
               {imagePreview ? (
                 <div className="relative h-40 rounded-lg overflow-hidden border">
-                  <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                  <Image src={imagePreview} alt="Aperçu" fill className="object-cover" />
                   <Button
                     type="button"
                     variant="destructive"
@@ -159,7 +157,7 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
               ) : (
                 <label className="flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
                   <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Click to upload thumbnail</span>
+                  <span className="text-sm text-muted-foreground">Cliquez pour télécharger une image</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -172,50 +170,50 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" required placeholder="e.g. Hypertrophy 101" />
+            <Label htmlFor="title">Titre</Label>
+            <Input id="title" name="title" required placeholder="ex: Hypertrophie 101" />
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the goal of this program..." />
+            <Textarea id="description" name="description" placeholder="Décrivez l'objectif de ce programme..." />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="level">Level</Label>
+            <Label htmlFor="level">Niveau</Label>
             <Select name="level" defaultValue="Beginner">
               <SelectTrigger>
-                <SelectValue placeholder="Select level" />
+                <SelectValue placeholder="Sélectionner le niveau" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
+                <SelectItem value="Beginner">Débutant</SelectItem>
+                <SelectItem value="Intermediate">Intermédiaire</SelectItem>
+                <SelectItem value="Advanced">Avancé</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Exercises</Label>
+              <Label>Exercices</Label>
               <Button type="button" variant="outline" size="sm" onClick={addExercise}>
-                Add Exercise
+                Ajouter un Exercice
               </Button>
             </div>
             <div className="space-y-2">
               {exercises.map((ex, i) => (
                 <div key={i} className="flex gap-2 items-end border p-2 rounded-md">
                   <div className="flex-1 grid gap-1">
-                    <Label className="text-xs">Name</Label>
+                    <Label className="text-xs">Nom</Label>
                     <Input 
                       value={ex.name} 
                       onChange={(e) => updateExercise(i, 'name', e.target.value)}
-                      placeholder="Exercise name"
+                      placeholder="Nom de l'exercice"
                       required
                     />
                   </div>
                   <div className="w-20 grid gap-1">
-                    <Label className="text-xs">Sets</Label>
+                    <Label className="text-xs">Séries</Label>
                     <Input 
                       type="number" 
                       value={ex.sets} 
@@ -242,7 +240,8 @@ export default function CreateProgramForm({ coachId }: { coachId: string }) {
 
           <DialogFooter>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Program'}
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? 'Création...' : 'Créer le Programme'}
             </Button>
           </DialogFooter>
         </form>
