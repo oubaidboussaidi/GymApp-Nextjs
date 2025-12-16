@@ -17,7 +17,7 @@ const ProgramRatingSchema: Schema<IProgramRating> = new Schema(
     { timestamps: true }
 );
 
-// Ensure one rating per user per program
+
 ProgramRatingSchema.index({ programId: 1, userId: 1 }, { unique: true });
 
 const ProgramRating: Model<IProgramRating> =

@@ -19,7 +19,7 @@ const StatsHistorySchema: Schema<IStatsHistory> = new Schema(
     { timestamps: true }
 );
 
-// Index for efficient querying
+
 StatsHistorySchema.index({ userId: 1, recordedAt: -1 });
 
 const StatsHistory: Model<IStatsHistory> =

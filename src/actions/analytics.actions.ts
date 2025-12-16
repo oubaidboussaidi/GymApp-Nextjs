@@ -34,21 +34,21 @@ export async function getAdminAnalytics() {
                 .lean(),
         ]);
 
-        // Users by role
+
         const usersByRole = {
             admin: await User.countDocuments({ role: 'admin', isActive: true }),
             coach: totalCoaches,
             client: totalClients,
         };
 
-        // Top programs by enrollment
+
         const topPrograms = await Program.find()
             .sort({ totalEnrollments: -1 })
             .limit(5)
             .populate('coachId', 'name')
             .lean();
 
-        // Programs per coach
+
         const coachPrograms = await Program.aggregate([
             {
                 $lookup: {
@@ -70,7 +70,7 @@ export async function getAdminAnalytics() {
             { $limit: 10 },
         ]);
 
-        // Average rating
+
         const ratingStats = await ProgramRating.aggregate([
             {
                 $group: {
@@ -132,7 +132,7 @@ export async function getCoachAnalytics(coachId: string) {
                 .lean(),
         ]);
 
-        // Students per program
+
         const studentsPerProgram = await Enrollment.aggregate([
             { $match: { programId: { $in: programIds } } },
             {

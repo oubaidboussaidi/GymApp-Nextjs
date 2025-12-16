@@ -68,7 +68,7 @@ export async function getStatsAnalytics(userId: string) {
             return { success: false, error: 'User not found' };
         }
 
-        // Calculate trends
+
         const current = user.physicalStats || {};
         const oldestStats = history[history.length - 1] || {};
 

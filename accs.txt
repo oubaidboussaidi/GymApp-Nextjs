@@ -1,9 +1,0 @@
-Admin: 
-admin@gymcore.com
- / admin123
-Coach: 
-coach@gymcore.com
- / coach123
-Client: 
-user@gymcore.com
- / user123

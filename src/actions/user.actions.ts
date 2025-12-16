@@ -47,13 +47,13 @@ export async function updateUser(userId: string, data: Partial<IUser>) {
   await simulateLatency();
   await dbConnect();
   try {
-    // Prevent role update via this action for security
+
     const { role, password, physicalStats, ...otherData } = data as any;
 
-    // Build update object
+
     const updateObj: any = { ...otherData };
 
-    // Handle physicalStats with dot notation for partial updates
+
     if (physicalStats) {
       if (physicalStats.weight !== undefined) {
         updateObj['physicalStats.weight'] = physicalStats.weight;
@@ -67,7 +67,7 @@ export async function updateUser(userId: string, data: Partial<IUser>) {
     }
 
     const result = await User.findByIdAndUpdate(
-      userId, 
+      userId,
       { $set: updateObj },
       { new: true }
     );
@@ -91,7 +91,7 @@ export async function getCoaches() {
   await dbConnect();
   try {
     const coaches = await User.find({ role: 'coach' }).select('-password').lean();
-    // Convert ObjectId to string for client components
+
     return JSON.parse(JSON.stringify(coaches));
   } catch (error) {
     console.error('Get coaches error:', error);
@@ -252,29 +252,29 @@ export async function deleteOwnAccount(userId: string) {
     if (!user) {
       return { error: 'User not found' };
     }
-    
+
     // Prevent admin from deleting their own account via this action
     if (user.role === 'admin') {
       return { error: 'Admin accounts cannot be deleted this way' };
     }
-    
+
     // Delete related enrollments
     const Enrollment = (await import('@/models/Enrollment')).default;
     await Enrollment.deleteMany({ studentId: userId });
-    
+
     // If coach, delete their programs and related enrollments
     if (user.role === 'coach') {
       const Program = (await import('@/models/Program')).default;
       const coachPrograms = await Program.find({ coachId: userId }).select('_id');
       const programIds = coachPrograms.map((p: any) => p._id);
-      
+
       // Delete enrollments in coach's programs
       await Enrollment.deleteMany({ programId: { $in: programIds } });
-      
+
       // Delete coach's programs
       await Program.deleteMany({ coachId: userId });
     }
-    
+
     await User.findByIdAndDelete(userId);
     return { success: true };
   } catch (error) {

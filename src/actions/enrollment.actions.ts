@@ -16,7 +16,7 @@ export async function enrollUser(studentId: string, programId: string) {
 
     await Enrollment.create({ studentId, programId });
 
-    // Increment program enrollment count
+
     const Program = (await import('@/models/Program')).default;
     await Program.findByIdAndUpdate(programId, {
       $inc: { totalEnrollments: 1 },

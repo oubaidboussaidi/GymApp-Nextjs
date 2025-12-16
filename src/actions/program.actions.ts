@@ -182,14 +182,14 @@ export async function rateProgram(programId: string, userId: string, rating: num
   try {
     const ProgramRating = (await import('@/models/ProgramRating')).default;
 
-    // Upsert rating
+
     await ProgramRating.findOneAndUpdate(
       { programId, userId },
       { rating, review },
       { upsert: true, new: true }
     );
 
-    // Recalculate average rating
+
     const ratings = await ProgramRating.find({ programId });
     const avgRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
 

@@ -8,9 +8,9 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1">
-        {/* Hero Section */}
+
         <section className="py-24 md:py-32 px-4 text-center space-y-8 bg-gradient-to-b from-background to-muted/20">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight max-w-3xl mx-auto">
             Atteignez vos Objectifs avec <span className="text-primary">GymCore</span>
@@ -32,7 +32,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
+
         <section className="py-20 px-4 container mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="bg-card/50 border-muted">
